@@ -1,0 +1,120 @@
+---
+author: "Paul Schrimpf"
+title: "Identification in Dynamic Discrete Models"
+subtitle: "UBC ECON 567 Assignment"
+date: "March 28, 2024"
+bibliography: "ddg.bib"
+engine: julia
+execute:
+  daemon: 3600
+format:
+  html:
+    toc: true
+    html-math-method: katex
+    theme: simplex
+---
+
+Please write your answers in a literate programming format, such as a Pluto, Jupyter, or Quarto notebook. Turn in both the notebook file and an html or pdf.
+
+# Simulation and Estimation
+
+::: {.callout-caution}
+
+## Problem 1
+
+Adapt the equilibrium calculation, simulation, and estimation code in [`dyanmicgame.jl`](https://faculty.arts.ubc.ca/pschrimpf/567/dynamicgame.html) to compute an equlibrium, simulate, and estimate with a single agent firm (`N=1`).  Most of the code will just work, except the `transition` function, but it is not needed here.  Check your code by simulating some data with `N=1` and `Nexternal=2`, and then estimating the model with the simulated data. When simulating, set `T` to `20_000` so that it easier to distinguish estimation noise from some other problem.  Make a table similar to one in `dynamicgame.jl` at the end of the "Estimation" section comparing the true payoffs and estimated payoffs.
+
+:::
+
+# Fitted and True Choice Probabilities
+
+The function `DG.equlibrium` returns a tuple consisting the output of `NLsolve.solve` and the equilibrium choice probabilities.
+```{julia}
+#| eval: false
+res, choicep = DG.equilibrium(g)
+```
+The equilibrium choice probabilities are in a 3-dimensional array of size number of players by number of actions by number of states. `choicep[i,a,s]` is the probability player `i` chooses action `a` in state `s`.
+
+::: {.callout-caution}
+
+## Problem 2
+
+Compare the true choice probabilities with the estimated choice probabilities from the model. To calculate the estimated choice probabilities, create a new `DG.DynamicGame` with the payoff function given by the estimated payoffs from problem 1. You may use the code below to get started. Create a table and/or figure that compares the estimated and true choice probabilities.
+
+:::
+
+```{julia}
+#| eval: false
+function createufunction(Eu::AbstractArray)
+	N = size(Eu,1)
+    Nstates = size(Eu,3)
+    Nchoices = size(Eu,2)
+	Nexternal=Int(log2(Nstates))-N
+	states = BitVector.(digits.(0:(2^(N+Nexternal)-1), base=2, pad=N+Nexternal))
+    @show states
+    statedict = Dict(statevec(x)=>x for x in 1:length(states))
+    u(i,a,x::Integer) = Eu[i,a[1],x]
+    u(i,a,s::AbstractVector) = u(i,a,statedict[s])
+    return(u)
+end
+
+û = createufunction(Eu) # assuming you used Eu as the estimated payoffs in Problem 1
+ĝ = DG.DynamicGame(N,û, 0.9, Ex, 1:2, 1:ns)
+res, choicep̂ = DG.equilibrium(ĝ)
+
+# create table and/or figure comparing choicep̂ and choicep
+```
+
+# Counterfactual Choice Probabilities
+
+
+::: {.callout-caution}
+
+## Problem 3
+Suppose the payoff of action 2 in states 2, 4, 6, and 8 is decreased by 0.25. Compute the true and estimated change in choice probabilities. Compare the true and estimated change in choice probabilities in a figure or table.
+
+:::
+
+You can create an appropriate shifted payoff function and new choice probabilities with the following code.
+
+```{julia}
+#| eval: false
+u2(i,a,s) = u(i,a,s) + (s % 2 == 0)*(-0.25)
+g2 = DG.DynamicGame(N, u2, 0.9, Ex, 1:2, 1:ns)
+res2, choicep2 = DG.equilibrium(g2)
+```
+
+
+# Incorrect Payoff Normalization
+
+::: {.callout-caution}
+
+## Problem 4
+
+The estimation code assumes the payoff of action 1 is 0 in all states. What if this assumption is incorrect? To explore what happens, simulate data where the payoff of action 1 is `-(s-3.5)/5*(s % 2==1)` in state `s`, and the payoff of action 2 is the same as in problems 1-3. Then estimate the model assuming the payoff of action 1 is 0. Finally, calculate the change in conditional choice probabilities from decreasing the payoff of action 2 in states 2, 4, 6, and 8 by 0.25 as in problem 3. Does an incorrect normalization affect the estimated change in choice probabilities?
+
+:::
+
+# Shift in Transitions
+
+
+::: {.callout-caution}
+
+## Problem 5
+
+Repeat the analysis in problem 4, but instead of a shift in payoffs, suppose the transition probability of the exogenous state changes. Consider a change of `Ex` with `pstay=0.7`, to `pstay=0.9`. Comment on your findings.
+
+:::
+
+
+# Implications
+
+::: {.callout-caution}
+
+## Problem 6
+
+Read @kalouptsidi2021. What findings of theirs do the above simulations illustrate?
+
+:::
+
+For further reading, consider looking at @kalouptsidi2017 and @kalouptsidi2024.
