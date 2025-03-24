@@ -3,11 +3,17 @@ author: "Paul Schrimpf"
 title: "Identification in Dynamic Discrete Models: Solutions"
 subtitle: "UBC ECON 567 Assignment"
 date: "March 28, 2024"
-bibliograph: "ddg.bib"
+bibliography: "ddg.bib"
 engine: julia
 execute:
   daemon: 3600
+format:
+  html:
+    toc: true
+    html-math-method: katex
+    theme: simplex
 ---
+
 
 
 # Simulation and Estimation
@@ -486,7 +492,7 @@ The model correctly estimates the counterfactual change in choice probabilities 
 
 # Incorrect Payoff Normalization
 
-::: {.callout-action}
+::: {.callout-caution}
 
 ## Problem 4
 
@@ -538,7 +544,7 @@ Even with an incorrect normalization, it appears that this method correctly esti
 # Shift in Transitions
 
 
-::: {.callout-action}
+::: {.callout-caution}
 
 ## Problem 5
 
@@ -569,3 +575,15 @@ choicepchange(P0, P1, P0̂, P1̂) |> draw
 ```
 
 Now, the estimated changes in choice probabilities are incorrect. An incorrect payoff normalization does not mess up counterfactuals with respect to shifts in the payoff function, but does mess up counterfactuals with respect to changes in the transition probabilities.
+
+# Implications
+
+::: {.callout-caution}
+
+## Problem 6
+
+Read @kalouptsidi2021. What findings of theirs do the above simulations illustrate?
+
+:::
+
+For further reading, consider looking at @kalouptsidi2017 and @kalouptsidi2024.
